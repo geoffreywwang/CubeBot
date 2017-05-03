@@ -141,13 +141,16 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             Scalar tempRgba = convertScalarHsv2Rgba(box.getColorHsv());
             double hue = box.getColorHsv().val[0];
             double sat = box.getColorHsv().val[1];
+            double val = box.getColorHsv().val[2];
             double red = tempRgba.val[0];
             double blue = tempRgba.val[1];
             double green = tempRgba.val[2];
 
             String tempString = "";
-            if(sat > 240){
+            if(sat < 20 && val > 200){
                 tempString = "W";
+            }else if(hue > 28 && hue < 40){
+                tempString = "Y";
             }else if(hue > 170 && hue < 240){
                 tempString = "B";
             }else if(hue > 80 && hue < 140){
@@ -156,8 +159,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 tempString = "R";
             }else if(hue > 20 && hue < 40){
                 tempString = "O";
-            }else if(hue > 50 && hue < 60){
-                tempString = "Y";
             }else{
                 tempString = "N/A";
             }
@@ -171,8 +172,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-//                textView.setText("Color: " + mBlobColorRgba.val[0] + ',' + mBlobColorRgba.val[1] + ',' + mBlobColorRgba.val[2]);
-//                textView.setTextColor(Color.rgb((int) mBlobColorRgba.val[0], (int) mBlobColorRgba.val[1], (int) mBlobColorRgba.val[2]));
+                if(boxes != null) {
+                    textView.setText("Color: " + boxes.get(0).getColorHsv().val[0] + ',' + boxes.get(0).getColorHsv().val[1] + ',' + boxes.get(0).getColorHsv().val[2]);
+                    textView.setTextColor(Color.BLUE);
+                }
                 autoRefresh();
             }
         }, 100);
