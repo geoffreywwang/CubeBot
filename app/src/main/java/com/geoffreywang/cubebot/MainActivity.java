@@ -3,8 +3,11 @@ package com.geoffreywang.cubebot;
 import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.SurfaceView;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.TextView;
 import android.os.Handler;
 
@@ -30,7 +33,21 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private final Handler handler = new Handler();
 
     private ArrayList<DetectionBox> boxes;
-    private Point[] boxLocations = {new Point(0.5,0.5),new Point(0.5,0.25),new Point(0.5,0.75),new Point(0.25,0.5),new Point(0.75,0.5)};
+    /**
+     * Box Location Diagram:
+     *
+     *      |       3
+     *      |   2       6
+     *      |1      5       9
+     *      |   4       8
+     *      |       7
+     */
+    private Point[] boxLocations = {
+            new Point(-1,0),new Point(-0.5,-0.5),new Point(0,-1),
+            new Point(-0.5,0.5),new Point(0,0),new Point(0.5,-0.5),
+            new Point(0,1),new Point(0.5,0.5),new Point(1,0)};
+    private int boxLayoutDistance = 600;
+    private int boxSize = 110;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +61,13 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.cameraView);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(this);
+
+        final Button button = (Button) findViewById(R.id.button);
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                printFace();
+            }
+        });
 
         autoRefresh();
     }
@@ -105,21 +129,15 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame cvCameraViewFrame) {
         mRgba = cvCameraViewFrame.rgba();
         if(boxes == null){
+            Point tempCenter = new Point(mRgba.width()/2,mRgba.height()/2);
             boxes = new ArrayList<>();
             for(Point boxLocation: boxLocations){
-                boxes.add(new DetectionBox(new Point(boxLocation.x*mRgba.width(),boxLocation.y*mRgba.height()),100));
+                boxes.add(new DetectionBox(new Point(boxLocation.x*boxLayoutDistance+tempCenter.x,boxLocation.y*boxLayoutDistance+tempCenter.y),boxSize));
             }
         }
         processColor();
         drawOnFrame();
         return mRgba;
-    }
-
-    private Scalar convertScalarHsv2Rgba(Scalar hsvColor){
-        Mat pointMatRgba = new Mat();
-        Mat pointMatHsv = new Mat(1,1, CvType.CV_8UC3,hsvColor);
-        Imgproc.cvtColor(pointMatHsv,pointMatRgba,Imgproc.COLOR_HSV2RGB_FULL,4);
-        return  new Scalar(pointMatRgba.get(0,0));
     }
 
     private void processColor(){
@@ -137,34 +155,12 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     private void drawOnFrame(){
-        for(DetectionBox box : boxes) {
-            Scalar tempRgba = convertScalarHsv2Rgba(box.getColorHsv());
-            double hue = box.getColorHsv().val[0];
-            double sat = box.getColorHsv().val[1];
-            double val = box.getColorHsv().val[2];
-            double red = tempRgba.val[0];
-            double blue = tempRgba.val[1];
-            double green = tempRgba.val[2];
+        for (int i = 0; i < boxes.size(); i++) {
+            DetectionBox box = boxes.get(i);
 
-            String tempString = "";
-            if(sat < 20 && val > 200){
-                tempString = "W";
-            }else if(hue > 28 && hue < 40){
-                tempString = "Y";
-            }else if(hue > 170 && hue < 240){
-                tempString = "B";
-            }else if(hue > 80 && hue < 140){
-                tempString = "G";
-            }else if(hue > 355 || hue < 10){
-                tempString = "R";
-            }else if(hue > 20 && hue < 40){
-                tempString = "O";
-            }else{
-                tempString = "N/A";
-            }
-
-            Imgproc.rectangle(mRgba, box.getTopLeftPoint(), box.getBottomRightPoint(), tempRgba, 3);
-            Imgproc.putText(mRgba,tempString,box.getCenter(),1,10,new Scalar(0,0,255,255),10);
+            Point textDrawPoint = new Point(box.getCenter().x-box.getSize(),box.getCenter().y+box.getSize());
+            Imgproc.rectangle(mRgba, box.getTopLeftPoint(), box.getBottomRightPoint(), new Scalar(255,0,0,255), 4);
+            Imgproc.putText(mRgba,(i+1)+":"+box.getColor(),textDrawPoint,1,6,new Scalar(0,0,255,255),10);
         }
     }
 
@@ -179,5 +175,17 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 autoRefresh();
             }
         }, 100);
+    }
+
+    private void printFace() {
+        String tempString = "";
+        for (int i = 0; i < boxes.size(); i++) {
+            DetectionBox box = boxes.get(i);
+            tempString += box.getColor() + " ";
+            if(i%3==2){
+                Log.d("CubeFace", tempString);
+                tempString = "";
+            }
+        }
     }
 }
