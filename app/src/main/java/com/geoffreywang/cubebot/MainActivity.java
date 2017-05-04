@@ -16,10 +16,8 @@ import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Core;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
-import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
@@ -31,6 +29,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private TextView textView;
     private Mat mRgba;
     private final Handler handler = new Handler();
+    private String[] faces;
 
     private ArrayList<DetectionBox> boxes;
     /**
@@ -65,10 +64,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         final Button button = (Button) findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                printFace();
+                saveFace();
             }
         });
 
+        faces = new String[6];
         autoRefresh();
     }
 
@@ -187,5 +187,35 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 tempString = "";
             }
         }
+    }
+
+    private void saveFace(){
+        String tempString = "";
+        for (int i = 0; i < boxes.size(); i++) {
+            DetectionBox box = boxes.get(i);
+            tempString += box.getColor();
+        }
+        int index = 0;
+        if(tempString.substring(4,5).equals("W")){
+            index = 0;
+        }else if(tempString.substring(4,5).equals("R")){
+            index = 1;
+        }else if(tempString.substring(4,5).equals("G")){
+            index = 2;
+        }else if(tempString.substring(4,5).equals("Y")){
+            index = 3;
+        }else if(tempString.substring(4,5).equals("O")){
+            index = 4;
+        }else if(tempString.substring(4,5).equals("B")){
+            index = 5;
+        }
+
+        faces[index] = tempString;
+
+        tempString = "";
+        for (int i = 0; i < faces.length; i++) {
+            tempString += faces[i];
+        }
+        Log.d("CubeFace", tempString);
     }
 }
