@@ -11,6 +11,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.os.Handler;
 
+import com.cs0x7f.min2phase.Main;
+
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
@@ -64,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         final Button button = (Button) findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                Log.d("CubeFace", Main.solveCube("YYYYWYYWWGRGWOGWBWGOORBRYBGBORGYWRGBRBRYRBBOOOOBRGGOWW"));
                 saveFace();
             }
         });
