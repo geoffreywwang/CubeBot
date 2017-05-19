@@ -1,4 +1,4 @@
-package com.geoffreywang.cubebot;
+package com.geoffreywang.cubeApp;
 
 import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;

@@ -1,4 +1,4 @@
-package com.geoffreywang.cubebot;
+package com.geoffreywang.cubeApp;
 
 import org.opencv.core.Point;
 import org.opencv.core.Rect;

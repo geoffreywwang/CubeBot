@@ -1,4 +1,4 @@
-package com.geoffreywang.cubebot;
+package com.geoffreywang.cubeApp;
 
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
