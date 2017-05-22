@@ -15,17 +15,28 @@
 
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/textView" />
+        android:layout_height="match_parent"
+        android:id="@+id/layout">
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/button"
-            android:layout_below="@id/textView"
+            android:id="@+id/buttonStart"
+            android:onClick="onClickStart"
+            android:text="START"
             android:layout_alignParentLeft="true"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/buttonConnect"
+            android:layout_below="@id/buttonStart"
+            android:onClick="onClickConnect"
+            android:text="CONNECT"
+            android:layout_alignParentLeft="true"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/buttonConnect"
+            android:id="@+id/textView" />
     </RelativeLayout>
 
 </android.support.constraint.ConstraintLayout>

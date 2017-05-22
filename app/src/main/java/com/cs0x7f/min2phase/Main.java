@@ -51,7 +51,7 @@ public class Main {
         mask |= inverse ? Search.INVERSE_SOLUTION : 0;
         mask |= showLength ? Search.APPEND_LENGTH : 0;
         long t = System.nanoTime();
-        String result = search.solution(cubeString, maxDepth, 100, 0, mask);;
+        String result = search.solution(cubeString, maxDepth, 100, 0, mask);
         // ++++++++++++++++++++++++ Call Search.solution method from package org.kociemba.twophase ++++++++++++++++++++++++
         while (result.startsWith("Error 8") && ((System.nanoTime() - t) < maxTime * 1.0e9)) {
             result = search.next(100, 0, mask);

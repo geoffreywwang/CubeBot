@@ -1,17 +1,34 @@
 package com.geoffreywang.cubeApp;
 
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
+import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbDeviceConnection;
+import android.hardware.usb.UsbManager;
+import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LayoutAnimationController;
 import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.os.Handler;
 
 import com.cs0x7f.min2phase.Main;
+import com.cs0x7f.min2phase.Search;
+import com.felhr.usbserial.UsbSerialDevice;
+import com.felhr.usbserial.UsbSerialInterface;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
@@ -23,9 +40,84 @@ import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
+
+
+    //FOR SERIAL CONNECTION
+    private static final String ACTION_USB_PERMISSION = "com.android.example.USB_PERMISSION";
+
+    UsbDevice device;
+    UsbDeviceConnection connection;
+    UsbManager usbManager;
+    UsbSerialDevice serialPort;
+    PendingIntent pendingIntent;
+    boolean isSerialStarted;
+
+    private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(ACTION_USB_PERMISSION)) {
+                boolean granted = intent.getExtras().getBoolean(UsbManager.EXTRA_PERMISSION_GRANTED);
+                if (granted) {
+                    connection = usbManager.openDevice(device);
+                    serialPort = UsbSerialDevice.createUsbSerialDevice(device, connection);
+                    if (serialPort != null) {
+                        if (serialPort.open()) {
+                            serialPort.setBaudRate(9600);
+                            serialPort.setDataBits(UsbSerialInterface.DATA_BITS_8);
+                            serialPort.setStopBits(UsbSerialInterface.STOP_BITS_1);
+                            serialPort.setParity(UsbSerialInterface.PARITY_NONE);
+                            serialPort.setFlowControl(UsbSerialInterface.FLOW_CONTROL_OFF);
+                            serialPort.read(mCallback);
+                        } else {
+                            Log.d("SERIAL", "PORT NOT OPEN");
+                        }
+                    } else {
+                        Log.d("SERIAL", "PORT IS NULL");
+                    }
+                } else {
+                    Log.d("SERIAL", "PERMISSION NOT GRANTED");
+                }
+            } else if (intent.getAction().equals(UsbManager.ACTION_USB_DEVICE_ATTACHED)) {
+
+            } else if (intent.getAction().equals(UsbManager.ACTION_USB_DEVICE_DETACHED)) {
+                //can add something to close the connection
+            }
+        };
+    };
+
+    private UsbSerialInterface.UsbReadCallback mCallback = new UsbSerialInterface.UsbReadCallback() {
+        //Defining a Callback which triggers whenever data is read.
+        @Override
+        public void onReceivedData(byte[] arg0) {
+            String data = null;
+            try {
+                data = new String(arg0, "UTF-8");
+                data.concat("/n");
+                if(!data.isEmpty() && !data.equals("")) {
+                    tvAppend(textView, data);
+                }
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
+    private void tvAppend(final TextView tv, final CharSequence text) {
+        runOnUiThread(new Runnable() {
+            @Override public void run() {
+                if (text != null) {
+                    tv.setText(text);
+//                    tv.append(text);
+                }
+            }
+        });
+    }
 
     private CameraBridgeViewBase mOpenCvCameraView;
     private TextView textView;
@@ -52,6 +144,13 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        isSerialStarted = false;
+
+        pendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
+        IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
+        registerReceiver(broadcastReceiver, filter);
+
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -63,13 +162,58 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(this);
 
-        final Button button = (Button) findViewById(R.id.button);
-        button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                Log.d("CubeFace", Main.solveCube("YYYYWYYWWGRGWOGWBWGOORBRYBGBORGYWRGBRBRYRBBOOOOBRGGOWW"));
-                saveFace();
+        new Thread(new Runnable() {
+            public void run() {
+                if (!Search.isInited()) {
+                    Search.init();
+                }
             }
-        });
+        }).start();
+
+
+        //USED TO ROTATE SOMETHING 90º
+//        Animation rotateAnim = AnimationUtils.loadAnimation(this, R.anim.rotation);
+//        LayoutAnimationController animController = new LayoutAnimationController(rotateAnim, 0);
+//        RelativeLayout layout = (RelativeLayout) findViewById(R.id.layout);
+//        layout.setLayoutAnimation(animController);
+
+//        final Button button = (Button) findViewById(R.id.buttonStart);
+//        button.setText("Button");
+//        button.setOnClickListener(new View.OnClickListener() {
+//            public void onClick(View v) {
+//                if (!isSerialStarted) {
+//                    usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
+//
+//                    HashMap<String, UsbDevice> usbDevices = usbManager.getDeviceList();
+//                    if (!usbDevices.isEmpty()) {
+//                        boolean keep = true;
+//                        for (Map.Entry<String, UsbDevice> entry : usbDevices.entrySet()) {
+//                            device = entry.getValue();
+//                            int deviceVID = device.getVendorId();
+//
+//                            if (deviceVID == 1027 || deviceVID == 9025) { //Arduino Vendor ID
+//                                usbManager.requestPermission(device, pendingIntent);
+//                                keep = false;
+//                            } else {
+//                                connection = null;
+//                                device = null;
+//                            }
+//                            if (!keep)
+//                                break;
+//                        }
+//                    }
+//                }
+////                if(Search.isInited()) {
+////                    String cubeString = "YYYYWYYWWGRGWOGWBWGOORBRYBGBORGYWRGBRBRYRBBOOOOBRGGOWW";
+////                    Long tempTime = SystemClock.currentThreadTimeMillis();
+////                    Log.i("CubeFace", Main.solveCube(cubeString));
+////                    Log.i("CubeFace", SystemClock.currentThreadTimeMillis() - tempTime + "");
+////                }else{
+////                    Log.i("CubeFace", "Search feature is not ready!");
+////                }
+////                saveFace();
+//            }
+//        });
 
         faces = new String[6];
         autoRefresh();
@@ -172,7 +316,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             @Override
             public void run() {
                 if(boxes != null) {
-                    textView.setText("Color: " + boxes.get(0).getColorHsv().val[0] + ',' + boxes.get(0).getColorHsv().val[1] + ',' + boxes.get(0).getColorHsv().val[2]);
+//                    textView.setText("Color: " + boxes.get(0).getColorHsv().val[0] + ',' + boxes.get(0).getColorHsv().val[1] + ',' + boxes.get(0).getColorHsv().val[2]);
                     textView.setTextColor(Color.BLUE);
                 }
                 autoRefresh();
@@ -186,7 +330,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             DetectionBox box = boxes.get(i);
             tempString += box.getColor() + " ";
             if(i%3==2){
-                Log.d("CubeFace", tempString);
+                Log.i("CubeFace", tempString);
                 tempString = "";
             }
         }
@@ -219,6 +363,39 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         for (int i = 0; i < faces.length; i++) {
             tempString += faces[i];
         }
-        Log.d("CubeFace", tempString);
+        Log.i("CubeFace", tempString);
+    }
+
+    public void onClickConnect(View view) {
+        if (!isSerialStarted) {
+            usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
+
+            HashMap<String, UsbDevice> usbDevices = usbManager.getDeviceList();
+            if (!usbDevices.isEmpty()) {
+                boolean keep = true;
+                for (Map.Entry<String, UsbDevice> entry : usbDevices.entrySet()) {
+                    device = entry.getValue();
+                    int deviceVID = device.getVendorId();
+
+                    if (deviceVID == 1027 || deviceVID == 9025) { //Arduino Vendor ID
+                        usbManager.requestPermission(device, pendingIntent);
+                        keep = false;
+                    } else {
+                        connection = null;
+                        device = null;
+                    }
+                    if (!keep)
+                        break;
+                }
+            }
+            isSerialStarted = true;
+        }
+    }
+
+    public void onClickStart(View view) {
+        if(isSerialStarted) {
+            String textInput = "03|17|75|";
+            serialPort.write(textInput.getBytes());
+        }
     }
 }
