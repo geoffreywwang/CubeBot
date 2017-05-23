@@ -15,9 +15,9 @@ public class Main {
     // +++++++++++++These variables used only in the GUI-interface+++++++++++++++++++++++++++++++++++++++++++++++++++++++
     private static final long serialVersionUID = 1L;
     static private int maxDepth = 21, maxTime = 5;
-    static boolean useSeparator = true;
+    static boolean useSeparator = false;
     static boolean inverse = false;
-    static boolean showLength = true;
+    static boolean showLength = false;
     static Search search = new Search();
 
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -62,28 +62,28 @@ public class Main {
         if (result.contains("Error")) {
             switch (result.charAt(result.length() - 1)) {
                 case '1':
-                    result = "There are not exactly nine facelets of each color!";
+                    result += " : There are not exactly nine facelets of each color!";
                     break;
                 case '2':
-                    result = "Not all 12 edges exist exactly once!";
+                    result = " : Not all 12 edges exist exactly once!";
                     break;
                 case '3':
-                    result = "Flip error: One edge has to be flipped!";
+                    result = " : Flip error: One edge has to be flipped!";
                     break;
                 case '4':
-                    result = "Not all 8 corners exist exactly once!";
+                    result = " : Not all 8 corners exist exactly once!";
                     break;
                 case '5':
-                    result = "Twist error: One corner has to be twisted!";
+                    result = " : Twist error: One corner has to be twisted!";
                     break;
                 case '6':
-                    result = "Parity error: Two corners or two edges have to be exchanged!";
+                    result = " : Parity error: Two corners or two edges have to be exchanged!";
                     break;
                 case '7':
-                    result = "No solution exists for the given maximum move number!";
+                    result = " : No solution exists for the given maximum move number!";
                     break;
                 case '8':
-                    result = "Timeout, no solution found within given maximum time!";
+                    result = " : Timeout, no solution found within given maximum time!";
                     break;
             }
         }

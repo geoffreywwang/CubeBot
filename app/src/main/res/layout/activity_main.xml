@@ -20,17 +20,41 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/buttonStart"
-            android:onClick="onClickStart"
-            android:text="START"
+            android:id="@+id/buttonConnect"
+            android:onClick="onClickConnect"
+            android:text="CONNECT"
             android:layout_alignParentLeft="true"/>
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/buttonConnect"
-            android:layout_below="@id/buttonStart"
-            android:onClick="onClickConnect"
-            android:text="CONNECT"
+            android:id="@+id/buttonOpen"
+            android:onClick="onClickOpen"
+            android:layout_toRightOf="@id/buttonConnect"
+            android:text="OPEN"
+            android:layout_alignParentLeft="true"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/buttonClose"
+            android:onClick="onClickClose"
+            android:layout_toRightOf="@id/buttonOpen"
+            android:text="CLOSE"
+            android:layout_alignParentLeft="true"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/buttonScan"
+            android:onClick="onClickScan"
+            android:layout_toRightOf="@id/buttonClose"
+            android:text="SCAN"
+            android:layout_alignParentLeft="true"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/buttonSolve"
+            android:onClick="onClickSolve"
+            android:layout_toRightOf="@id/buttonScan"
+            android:text="SOLVE"
             android:layout_alignParentLeft="true"/>
         <TextView
             android:layout_width="wrap_content"

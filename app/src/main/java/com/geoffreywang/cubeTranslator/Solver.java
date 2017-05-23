@@ -295,4 +295,20 @@ public class Solver {
         }
         return returnString;
     }
+
+    public static int convertColorFromText(String color){
+        if(color.equals("W")){
+            return Hand.WHITE;
+        }else if(color.equals("B")){
+            return Hand.BLUE;
+        }else if(color.equals("R")){
+            return Hand.RED;
+        }else if(color.equals("G")){
+            return Hand.GREEN;
+        }else if(color.equals("Y")){
+            return Hand.YELLOW;
+        }else { // O
+            return Hand.ORANGE;
+        }
+    }
 }
