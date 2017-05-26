@@ -29,7 +29,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/buttonOpen"
             android:onClick="onClickOpen"
-            android:layout_toRightOf="@id/buttonConnect"
+            android:layout_below="@id/buttonConnect"
             android:text="OPEN"
             android:layout_alignParentLeft="true"/>
         <Button
@@ -37,7 +37,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/buttonClose"
             android:onClick="onClickClose"
-            android:layout_toRightOf="@id/buttonOpen"
+            android:layout_below="@id/buttonOpen"
             android:text="CLOSE"
             android:layout_alignParentLeft="true"/>
         <Button
@@ -45,7 +45,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/buttonScan"
             android:onClick="onClickScan"
-            android:layout_toRightOf="@id/buttonClose"
+            android:layout_below="@id/buttonClose"
             android:text="SCAN"
             android:layout_alignParentLeft="true"/>
         <Button
@@ -53,7 +53,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/buttonSolve"
             android:onClick="onClickSolve"
-            android:layout_toRightOf="@id/buttonScan"
+            android:layout_below="@id/buttonScan"
             android:text="SOLVE"
             android:layout_alignParentLeft="true"/>
         <TextView
